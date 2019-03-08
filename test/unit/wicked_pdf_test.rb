@@ -157,7 +157,7 @@ class WickedPdfTest < ActiveSupport::TestCase
   test 'should parse other options' do
     [
       :orientation, :page_size, :proxy, :username, :password, :dpi,
-      :encoding, :user_style_sheet
+      :encoding, :user_style_sheet, :load_error_handling
     ].each do |o|
       assert_equal "--#{o.to_s.tr('_', '-')} opts", @wp.get_parsed_options(o => 'opts').strip
     end

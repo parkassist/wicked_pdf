@@ -68,7 +68,7 @@ class WickedPdf
     options.merge!(WickedPdf.config) { |_key, option, _config| option }
     generated_pdf_file = WickedPdfTempfile.new('wicked_pdf_generated_file.pdf', options[:temp_path])
     command = [@exe_path]
-    command << '-q' unless on_windows? # suppress errors on stdout
+    command << '-q' unless on_windows? || options[:log_level] # suppress errors on stdout
     command += parse_options(options)
     command << url
     command << generated_pdf_file.path.to_s
@@ -287,7 +287,8 @@ class WickedPdf
                                   :dpi,
                                   :page_size,
                                   :page_width,
-                                  :title])
+                                  :title,
+                                  :log_level])
       r += make_options(options, [:lowquality,
                                   :grayscale,
                                   :no_pdf_compression], '', :boolean)
@@ -308,7 +309,8 @@ class WickedPdf
                                   :encoding,
                                   :user_style_sheet,
                                   :viewport_size,
-                                  :window_status])
+                                  :window_status,
+                                  :load_error_handling])
       r += make_options(options, [:cookie,
                                   :post], '', :name_value)
       r += make_options(options, [:redirect_delay,

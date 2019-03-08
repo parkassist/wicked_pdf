@@ -180,6 +180,8 @@ class ThingsController < ApplicationController
                viewport_size:                  'TEXT',                    # available only with use_xserver or patched QT
                extra:                          '',                        # directly inserted into the command to wkhtmltopdf
                raise_on_all_errors:            nil,                       # raise error for any stderr output.  Such as missing media, image assets
+               log_level:                      'none',                    # Set log level to: none, error, warn or info
+               load_error_handling:            'abort'                    # Specify how to handle pages that fail to load: abort, ignore or skip
                outline: {   outline:           true,
                             outline_depth:     LEVEL },
                margin:  {   top:               SIZE,                     # default 10 (mm)
