@@ -75,8 +75,11 @@ class WickedPdf
 
     print_command(command.inspect) if in_development_mode?
 
-    err = Open3.popen3(*command) do |_stdin, _stdout, stderr|
-      stderr.read
+    err = Open3.popen3(*command) do |_stdin, stdout, stderr|
+      Rails.logger.info stdout.read if options[:log_level] == 'info'
+      stderr_text = stderr.read
+      Rails.logger.error stderr_text if stderr_text
+      stderr_text
     end
     if options[:return_file]
       return_file = options.delete(:return_file)
