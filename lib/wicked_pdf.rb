@@ -46,10 +46,12 @@ class WickedPdf
   end
 
   def pdf_from_html_file(filepath, options = {})
+    Rails.logger.info "[wicked_pdf]: Generating PDF from file #{filepath}" if options[:log_level] == 'info'
     pdf_from_url("file:///#{filepath}", options)
   end
 
   def pdf_from_string(string, options = {})
+    Rails.logger.info "[wicked_pdf]: Generating PDF from string" if options[:log_level] == 'info'
     options = options.dup
     options.merge!(WickedPdf.config) { |_key, option, _config| option }
     string_file = WickedPdfTempfile.new('wicked_pdf.html', options[:temp_path])
@@ -57,8 +59,7 @@ class WickedPdf
     string_file.write(string)
     string_file.close
 
-    pdf = pdf_from_html_file(string_file.path, options)
-    pdf
+    pdf_from_html_file(string_file.path, options)
   ensure
     string_file.close! if string_file
   end
@@ -74,6 +75,7 @@ class WickedPdf
     command << generated_pdf_file.path.to_s
 
     print_command(command.inspect) if in_development_mode?
+    Rails.logger.info "[wicked_pdf] #{command.inspect}" if !in_development_mode? && options[:log_level] == 'info'
 
     err = Open3.popen3(*command) do |_stdin, stdout, stderr|
       Rails.logger.info stdout.read if options[:log_level] == 'info'
@@ -82,14 +84,17 @@ class WickedPdf
       stderr_text
     end
     if options[:return_file]
+      Rails.logger.info "[wicked_pdf] Returning generated file" if options[:log_level] == 'info'
       return_file = options.delete(:return_file)
       return generated_pdf_file
     end
+    Rails.logger.info "[wicked_pdf] PDF file generated" if options[:log_level] == 'info'
     generated_pdf_file.rewind
     generated_pdf_file.binmode
     pdf = generated_pdf_file.read
     raise "Error generating PDF\n Command Error: #{err}" if options[:raise_on_all_errors] && !err.empty?
     raise "PDF could not be generated!\n Command Error: #{err}" if pdf && pdf.rstrip.empty?
+    Rails.logger.info "[wicked_pdf] PDF file returned" if options[:log_level] == 'info'
     pdf
   rescue StandardError => e
     raise "Failed to execute:\n#{command}\nError: #{e}"

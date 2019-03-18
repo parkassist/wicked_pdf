@@ -11,12 +11,17 @@ class WickedPdf
       @render_pdf = false
 
       set_request_to_render_as_pdf(env) if render_as_pdf?
+      Rails.logger.info "[wicked_pdf]: BEFORE @app.call(env) [#{@request.url}]" if rendering_pdf? && @options[:log_level] == 'info'
       status, headers, response = @app.call(env)
+      Rails.logger.info "[wicked_pdf]: AFTER @app.call(env) [#{@request.url}]" if rendering_pdf? && @options[:log_level] == 'info'
+
+      Rails.logger.info "[wicked_pdf]: headers['Content-Type'] => #{headers['Content-Type']}" if rendering_pdf? && @options[:log_level] == 'info'
 
       if rendering_pdf? && headers['Content-Type'] =~ /text\/html|application\/xhtml\+xml/
         body = response.respond_to?(:body) ? response.body : response.join
         body = body.join if body.is_a?(Array)
 
+        Rails.logger.info "[wicked_pdf]: Going to generate PDF from body" if @options[:log_level] == 'info'
         body = WickedPdf.new(@options[:wkhtmltopdf]).pdf_from_string(translate_paths(body, env), @options)
 
         response = [body]
